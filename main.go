@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 )
 
 func hello(w http.ResponseWriter, req *http.Request) {
@@ -10,11 +11,19 @@ func hello(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(w, "Hello Todo App")
 }
 
-func main() {
-	// Registering a handler
-	http.HandleFunc("/", hello)
+func getServerAddress() string {
+	// Checks if an environment var was passed
+	// If not, sets it as :8000
 
-	// Since a handler has been registered above, we can pass
-	// nil as the second arguement to listen and server
-	http.ListenAndServe(":8000", nil)
+	value, present := os.LookupEnv("PORT")
+	if present {
+		return value
+	}
+	return ":8000"
+}
+
+func main() {
+
+	http.HandleFunc("/", hello)
+	http.ListenAndServe(getServerAddress(), nil)
 }
