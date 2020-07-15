@@ -11,6 +11,10 @@ func hello(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(w, "Hello Todo App")
 }
 
+func healthcheck(w http.ResponseWriter, req *http.Request) {
+	fmt.Fprint(w, "REST based TODO APP is up and running")
+}
+
 func getServerAddress() string {
 	// Checks if a server address was passed as an
 	// environment variable
@@ -26,5 +30,6 @@ func getServerAddress() string {
 func main() {
 
 	http.HandleFunc("/hello", hello)
+	http.HandleFunc("/healthcheck", healthcheck)
 	http.ListenAndServe(getServerAddress(), nil)
 }
