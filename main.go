@@ -12,18 +12,19 @@ func hello(w http.ResponseWriter, req *http.Request) {
 }
 
 func getServerAddress() string {
-	// Checks if an environment var was passed
-	// If not, sets it as :8000
+	// Checks if a server address was passed as an
+	// environment variable
+	// If not, sets it as "127.0.0.1:8000"
 
-	value, present := os.LookupEnv("PORT")
+	value, present := os.LookupEnv("SERVER_ADDRESS")
 	if present {
 		return value
 	}
-	return ":8000"
+	return "127.0.0.1:8000"
 }
 
 func main() {
 
-	http.HandleFunc("/", hello)
+	http.HandleFunc("/hello", hello)
 	http.ListenAndServe(getServerAddress(), nil)
 }
