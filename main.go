@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -11,8 +12,18 @@ func hello(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(w, "Hello Todo App")
 }
 
+type healthJSON struct {
+	Name   string
+	Active bool
+}
+
 func healthcheck(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprint(w, "REST based TODO APP is up and running")
+	resp := &healthJSON{
+		Name:   "REST based TODO APP is up and running",
+		Active: true,
+	}
+	jsonResp, _ := json.Marshal(resp)
+	fmt.Fprint(w, string(jsonResp))
 }
 
 func getServerAddress() string {
