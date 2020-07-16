@@ -16,15 +16,13 @@ func healthcheck(w http.ResponseWriter, req *http.Request) {
 }
 
 func getServerAddress() string {
-	// Checks if a server address was passed as an
-	// environment variable
-	// If not, sets it as "127.0.0.1:8000"
 
-	value, present := os.LookupEnv("SERVER_ADDRESS")
+	const defaultServerAddress = "127.0.0.1:8000"
+	serverAddress, present := os.LookupEnv("SERVER_ADDRESS")
 	if present {
-		return value
+		return serverAddress
 	}
-	return "127.0.0.1:8000"
+	return defaultServerAddress
 }
 
 func main() {
