@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -11,20 +12,33 @@ func hello(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(w, "Hello Todo App")
 }
 
-func getServerAddress() string {
-	// Checks if a server address was passed as an
-	// environment variable
-	// If not, sets it as "127.0.0.1:8000"
+type healthJSON struct {
+	Name   string
+	Active bool
+}
 
-	value, present := os.LookupEnv("SERVER_ADDRESS")
-	if present {
-		return value
+func healthcheck(w http.ResponseWriter, req *http.Request) {
+	resp := &healthJSON{
+		Name:   "REST based TODO APP is up and running",
+		Active: true,
 	}
-	return "127.0.0.1:8000"
+	jsonResp, _ := json.Marshal(resp)
+	fmt.Fprint(w, string(jsonResp))
+}
+
+func getServerAddress() string {
+
+	const defaultServerAddress = "127.0.0.1:8000"
+	serverAddress, present := os.LookupEnv("SERVER_ADDRESS")
+	if present {
+		return serverAddress
+	}
+	return defaultServerAddress
 }
 
 func main() {
 
 	http.HandleFunc("/hello", hello)
+	http.HandleFunc("/healthcheck", healthcheck)
 	http.ListenAndServe(getServerAddress(), nil)
 }
