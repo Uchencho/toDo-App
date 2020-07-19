@@ -3,19 +3,20 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 )
-
-func hello(w http.ResponseWriter, req *http.Request) {
-	// Create a function that returns the string below
-	fmt.Fprint(w, "Hello Todo App")
-}
 
 type healthJSON struct {
 	Name   string
 	Active bool
 }
+
+var (
+	errorLogger *log.Logger
+	infoLogger  *log.Logger
+)
 
 func healthcheck(w http.ResponseWriter, req *http.Request) {
 	resp := &healthJSON{
@@ -24,6 +25,17 @@ func healthcheck(w http.ResponseWriter, req *http.Request) {
 	}
 	jsonResp, _ := json.Marshal(resp)
 	fmt.Fprint(w, string(jsonResp))
+}
+
+func theLogger() *os.File {
+	file, err := os.OpenFile("logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+	errorLogger = log.New(file, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
+	infoLogger = log.New(file, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
+
+	return file
 }
 
 func getServerAddress() string {
@@ -38,7 +50,19 @@ func getServerAddress() string {
 
 func main() {
 
-	http.HandleFunc("/hello", hello)
+	file := theLogger()
+
+	defer func() {
+		if err := file.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	// defer file.Close()
+
 	http.HandleFunc("/healthcheck", healthcheck)
-	http.ListenAndServe(getServerAddress(), nil)
+	infoLogger.Println(getServerAddress())
+	if err := http.ListenAndServe(getServerAddress(), nil); err != http.ErrServerClosed {
+		errorLogger.Println(err)
+	}
 }
