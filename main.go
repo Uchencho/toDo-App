@@ -51,11 +51,18 @@ func getServerAddress() string {
 func main() {
 
 	file := theLogger()
-	defer file.Close()
+
+	defer func() {
+		if err := file.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	// defer file.Close()
 
 	http.HandleFunc("/healthcheck", healthcheck)
 	infoLogger.Println(getServerAddress())
 	if err := http.ListenAndServe(getServerAddress(), nil); err != http.ErrServerClosed {
-		errorLogger.Println("Server closed or shutdown")
+		errorLogger.Println(err)
 	}
 }
