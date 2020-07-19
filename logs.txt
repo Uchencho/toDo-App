@@ -9,3 +9,6 @@ INFO: 2020/07/19 12:33:34 main.go:57: 127.0.0.1:8000
 ERROR: 2020/07/19 12:33:34 main.go:59: Server closed or shutdown
 INFO: 2020/07/19 12:43:45 main.go:64: 127.0.0.1:8000
 ERROR: 2020/07/19 12:43:45 main.go:66: listen tcp 127.0.0.1:8000: bind: address already in use
+INFO: 2020/07/19 18:25:36 main.go:64: 127.0.0.1:8000
+INFO: 2020/07/19 18:34:26 main.go:64: 127.0.0.1:8000
+INFO: 2020/07/19 18:40:57 main.go:64: 127.0.0.1:8000
