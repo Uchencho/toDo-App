@@ -8,6 +8,7 @@ import (
 )
 
 const url = "http://127.0.0.1:8000/healthcheck"
+const expectedBody = `{"Name":"REST based TODO APP is up and running","Active":true}`
 
 func main() {
 	resp, err := http.Get(url)
@@ -21,6 +22,9 @@ func main() {
 
 	if err != nil {
 		log.Println(err)
+	}
+	if resp.StatusCode != 200 || string(body) != expectedBody {
+		log.Fatalln(resp.StatusCode, string(body))
 	}
 
 	fmt.Printf("Status:	%d\n", resp.StatusCode)
