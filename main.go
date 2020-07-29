@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/Uchencho/toDo-App/app"
 )
 
 type healthJSON struct {
@@ -61,6 +63,7 @@ func main() {
 	// defer file.Close()
 
 	http.HandleFunc("/healthcheck", healthcheck)
+	http.HandleFunc("/create", app.CreateEntryEndpoint)
 	infoLogger.Println(getServerAddress())
 	if err := http.ListenAndServe(getServerAddress(), nil); err != http.ErrServerClosed {
 		errorLogger.Println(err)
