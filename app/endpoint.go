@@ -45,7 +45,7 @@ func ListAPIView(w http.ResponseWriter, req *http.Request) {
 		task{
 			Name:        "Nils",
 			Description: "test",
-			StartTime:   "startTime",
+			StartTime:   "02-08-2020",
 			Alarm:       true,
 		},
 		task{
