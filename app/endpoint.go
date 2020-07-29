@@ -39,3 +39,26 @@ func CreateEntryEndpoint(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(w, string(jsonResp))
 
 }
+
+func ListAPIView(w http.ResponseWriter, req *http.Request) {
+	tasks := []task{
+		task{
+			Name:        "Nils",
+			Description: "test",
+			StartTime:   "startTime",
+			Alarm:       true,
+		},
+		task{
+			Name:        "Uche",
+			Description: "List of all tasks created",
+			StartTime:   "08-08-2020",
+			Alarm:       false,
+		},
+	}
+	taskadd := &tasks
+	jsonResp, err := json.Marshal(taskadd)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Fprint(w, string(jsonResp))
+}
