@@ -20,7 +20,7 @@ func main() {
 	// defer file.Close()
 
 	http.HandleFunc("/healthcheck", app.Healthcheck)
-	http.HandleFunc("/create", app.CreateEntryEndpoint)
+	http.HandleFunc("/task/create", app.CreateEntryEndpoint)
 	http.HandleFunc("/tasks", app.ListAPIView)
 	app.InfoLogger.Println(app.GetServerAddress())
 	if err := http.ListenAndServe(app.GetServerAddress(), nil); err != http.ErrServerClosed {

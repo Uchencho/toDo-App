@@ -31,8 +31,7 @@ func createEntry(alarm bool, name, description, startTime string) task {
 
 func CreateEntryEndpoint(w http.ResponseWriter, req *http.Request) {
 	z := createEntry(false, "Uche", "First To DO entry", "01-08-2020")
-	u := &z
-	jsonResp, err := json.Marshal(u)
+	jsonResp, err := json.Marshal(z)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -55,8 +54,7 @@ func ListAPIView(w http.ResponseWriter, req *http.Request) {
 			Alarm:       false,
 		},
 	}
-	taskadd := &tasks
-	jsonResp, err := json.Marshal(taskadd)
+	jsonResp, err := json.Marshal(tasks)
 	if err != nil {
 		fmt.Println(err)
 	}
