@@ -24,6 +24,7 @@ func main() {
 	http.HandleFunc("/tasks", app.ListAPIView)
 	http.HandleFunc("/tasks/1", app.RetrieveAPIView)
 	http.HandleFunc("/tasks/2", app.DeleteTaskAPIView)
+	http.HandleFunc("/tasks/3", app.UpdateTaskAPIView)
 	app.InfoLogger.Println(app.GetServerAddress())
 	if err := http.ListenAndServe(app.GetServerAddress(), nil); err != http.ErrServerClosed {
 		app.ErrorLogger.Println(err)
