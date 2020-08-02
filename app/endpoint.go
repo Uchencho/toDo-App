@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type task struct {
@@ -73,39 +74,30 @@ func ListAPIView(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(w, string(jsonResp))
 }
 
-func RetrieveAPIView(w http.ResponseWriter, req *http.Request) {
-	tasks := createTasks()
-	jsonResp, err := json.Marshal(tasks[0])
-	if err != nil {
-		fmt.Printf("Error marshalling json %v", err)
-	}
-	fmt.Fprint(w, string(jsonResp))
-}
-
-func DeleteTaskAPIView(w http.ResponseWriter, req *http.Request) {
-	switch req.Method {
-	case http.MethodDelete:
-		const inputIndex = 2
-		tasks := createTasks()
-		tasks = append(tasks[:inputIndex], tasks[inputIndex+1:]...)
-		fmt.Fprint(w, "Item with ID "+strconv.Itoa(len(tasks))+" has been successully deleted")
-	default:
-		fmt.Fprint(w, "Method Not allowed")
-	}
-}
-
 func UpdateTaskAPIView(w http.ResponseWriter, req *http.Request) {
-	switch req.Method {
-	case http.MethodPut:
-		const inputIndex = 3
-		tasks := createTasks()
-		tasks[inputIndex].Alarm = true
+	id, _ := strconv.Atoi(strings.TrimPrefix(req.URL.Path, "/tasks/"))
 
-		jsonResp, err := json.Marshal(tasks[inputIndex])
+	switch req.Method {
+	case http.MethodGet:
+		tasks := createTasks()
+		jsonResp, err := json.Marshal(tasks[id])
 		if err != nil {
 			fmt.Printf("Error marshalling json %v", err)
 		}
 		fmt.Fprint(w, string(jsonResp))
+	case http.MethodPut:
+		tasks := createTasks()
+		tasks[id].Alarm = true
+
+		jsonResp, err := json.Marshal(tasks[id])
+		if err != nil {
+			fmt.Printf("Error marshalling json %v", err)
+		}
+		fmt.Fprint(w, string(jsonResp))
+	case http.MethodDelete:
+		tasks := createTasks()
+		tasks = append(tasks[:id], tasks[id+1:]...)
+		fmt.Fprint(w, "Item with ID "+strconv.Itoa(len(tasks))+" has been successully deleted")
 	default:
 		fmt.Fprint(w, "Method is not allowed")
 	}
