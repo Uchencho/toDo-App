@@ -62,6 +62,8 @@ func CreateEntryEndpoint(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
 	fmt.Fprint(w, string(jsonResp))
 }
 
@@ -71,11 +73,14 @@ func ListAPIView(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
 	fmt.Fprint(w, string(jsonResp))
 }
 
 func UpdateTaskAPIView(w http.ResponseWriter, req *http.Request) {
 	id, _ := strconv.Atoi(strings.TrimPrefix(req.URL.Path, "/tasks/"))
+	w.Header().Set("Content-Type", "application/json")
 
 	switch req.Method {
 	case http.MethodGet:
@@ -84,6 +89,7 @@ func UpdateTaskAPIView(w http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			fmt.Printf("Error marshalling json %v", err)
 		}
+		w.WriteHeader(200)
 		fmt.Fprint(w, string(jsonResp))
 	case http.MethodPut:
 		tasks := createTasks()
@@ -93,12 +99,15 @@ func UpdateTaskAPIView(w http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			fmt.Printf("Error marshalling json %v", err)
 		}
+		w.WriteHeader(201)
 		fmt.Fprint(w, string(jsonResp))
 	case http.MethodDelete:
-		tasks := createTasks()
-		tasks = append(tasks[:id], tasks[id+1:]...)
-		fmt.Fprint(w, "Item with ID "+strconv.Itoa(len(tasks))+" has been successully deleted")
+		// tasks := createTasks()
+		w.WriteHeader(204)
+		// tasks = append(tasks[:id], tasks[id+1:]...)
+		fmt.Fprint(w, "Item with ID "+strconv.Itoa(id)+" has been successully deleted")
 	default:
+		w.WriteHeader(400)
 		fmt.Fprint(w, "Method is not allowed")
 	}
 }
