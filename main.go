@@ -17,11 +17,10 @@ func main() {
 		}
 	}()
 
-	// defer file.Close()
-
 	http.HandleFunc("/healthcheck", app.Healthcheck)
 	http.HandleFunc("/task/create", app.CreateEntryEndpoint)
 	http.HandleFunc("/tasks", app.ListAPIView)
+	http.HandleFunc("/tasks/", app.TaskHandler)
 	app.InfoLogger.Println(app.GetServerAddress())
 	if err := http.ListenAndServe(app.GetServerAddress(), nil); err != http.ErrServerClosed {
 		app.ErrorLogger.Println(err)
