@@ -31,13 +31,16 @@ func SetupModels() *gorm.DB {
 	db.AutoMigrate(&Task{})
 
 	// Initialize record
-	m := Task{
-		Name:        "Uchenna",
-		Description: "First record into postgres from Go",
-		StartTime:   "03-08-2020",
-		Alarm:       false,
-	}
-	db.Create(&m)
-	fmt.Println("Successfully connected!")
+	/*
+		USED THIS TO ENSURE DATA WAS ACTUALLY WRITTEN TO DB
+		m := Task{
+			Name:        "Uchenna",
+			Description: "First record into postgres from Go",
+			StartTime:   "03-08-2020",
+			Alarm:       false,
+		}
+		db.Create(&m)
+		fmt.Println("Successfully connected!")
+	*/
 	return db
 }
