@@ -45,6 +45,10 @@ func createTasks() []task {
 	return tasks
 }
 
+func getTask(id int) task {
+	return createTasks()[id]
+}
+
 func createEntry(alarm bool, name, description, startTime string) task {
 
 	u := task{
@@ -78,24 +82,23 @@ func ListAPIView(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(w, string(jsonResp))
 }
 
-func UpdateTaskAPIView(w http.ResponseWriter, req *http.Request) {
+func TaskHandler(w http.ResponseWriter, req *http.Request) {
 	id, _ := strconv.Atoi(strings.TrimPrefix(req.URL.Path, "/tasks/"))
 	w.Header().Set("Content-Type", "application/json")
 
 	switch req.Method {
 	case http.MethodGet:
-		tasks := createTasks()
-		jsonResp, err := json.Marshal(tasks[id])
+		jsonResp, err := json.Marshal(getTask(id))
 		if err != nil {
 			fmt.Printf("Error marshalling json %v", err)
 		}
 		w.WriteHeader(200)
 		fmt.Fprint(w, string(jsonResp))
 	case http.MethodPut:
-		tasks := createTasks()
-		tasks[id].Alarm = true
+		u := getTask(id)
+		u.Alarm = true
 
-		jsonResp, err := json.Marshal(tasks[id])
+		jsonResp, err := json.Marshal(getTask(id))
 		if err != nil {
 			fmt.Printf("Error marshalling json %v", err)
 		}
