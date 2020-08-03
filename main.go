@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Uchencho/toDo-App/models"
+
 	"github.com/Uchencho/toDo-App/app"
 )
 
@@ -16,6 +18,8 @@ func main() {
 			log.Fatal(err)
 		}
 	}()
+
+	_ = models.SetupModels()
 
 	http.HandleFunc("/healthcheck", app.Healthcheck)
 	http.HandleFunc("/task/create", app.CreateEntryEndpoint)
