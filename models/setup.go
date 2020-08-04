@@ -7,7 +7,8 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
-func SetupModels() *gorm.DB {
+// ConnectDatabase creates a database connection for CRUD
+func ConnectDatabase() *gorm.DB {
 	const (
 		POSTGRES_USER     = "golang"
 		POSTGRES_PASSWORD = "googleGo"
@@ -27,18 +28,5 @@ func SetupModels() *gorm.DB {
 	fmt.Println("Connected")
 
 	db.AutoMigrate(&Task{})
-
-	// Initialize record
-	/*
-		USED THIS TO ENSURE DATA WAS ACTUALLY WRITTEN TO DB
-		m := Task{
-			Name:        "Uchenna",
-			Description: "First record into postgres from Go",
-			StartTime:   "03-08-2020",
-			Alarm:       false,
-		}
-		db.Create(&m)
-		fmt.Println("Successfully connected!")
-	*/
 	return db
 }

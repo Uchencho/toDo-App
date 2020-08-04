@@ -10,6 +10,8 @@ import (
 	"github.com/Uchencho/toDo-App/models"
 )
 
+var Db = models.ConnectDatabase()
+
 func CreateEntryEndpoint(w http.ResponseWriter, req *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
@@ -23,9 +25,7 @@ func CreateEntryEndpoint(w http.ResponseWriter, req *http.Request) {
 			panic(err)
 		}
 
-		db := models.SetupModels()
-		defer db.Close()
-		db.Create(&b)
+		Db.Create(&b)
 
 		jsonResp, err := json.Marshal(b)
 		if err != nil {
@@ -35,7 +35,7 @@ func CreateEntryEndpoint(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprint(w, string(jsonResp))
 
 	default:
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusMethodNotAllowed)
 		fmt.Fprint(w, `{"Message":"Method not allowed"}`)
 	}
 }
@@ -47,9 +47,7 @@ func ListAPIView(w http.ResponseWriter, req *http.Request) {
 	case http.MethodGet:
 		var b []models.Task
 
-		db := models.SetupModels()
-		defer db.Close()
-		db.Find(&b)
+		Db.Find(&b)
 
 		jsonResp, err := json.Marshal(b)
 		if err != nil {
@@ -60,7 +58,7 @@ func ListAPIView(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprint(w, string(jsonResp))
 
 	default:
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusMethodNotAllowed)
 		fmt.Fprint(w, `{"Message":"Method not allowed"}`)
 	}
 }
@@ -73,9 +71,7 @@ func TaskHandler(w http.ResponseWriter, req *http.Request) {
 	case http.MethodGet:
 		var b models.Task
 
-		db := models.SetupModels()
-		defer db.Close()
-		db.Find(&b, id)
+		Db.Find(&b, id)
 		if b.ID == 0 {
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprint(w, `{"Message":"No task with that ID"}`)
@@ -93,10 +89,9 @@ func TaskHandler(w http.ResponseWriter, req *http.Request) {
 		var b models.Task
 		var z models.Updatetask
 
-		// Initialize the model
-		db := models.SetupModels()
-		defer db.Close()
-		db.Find(&b, id)
+		// Initialize the mode
+
+		Db.Find(&b, id)
 		if b.ID == 0 {
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprint(w, `{"Message":"No task with that ID"}`)
@@ -111,7 +106,7 @@ func TaskHandler(w http.ResponseWriter, req *http.Request) {
 		}
 
 		// Update records that are available
-		db.Model(&b).Updates(models.Task{Name: z.Name,
+		Db.Model(&b).Updates(models.Task{Name: z.Name,
 			Description: z.Description,
 			StartTime:   z.StartTime,
 			Alarm:       z.Alarm})
@@ -125,13 +120,11 @@ func TaskHandler(w http.ResponseWriter, req *http.Request) {
 	case http.MethodDelete:
 		var b models.Task
 
-		db := models.SetupModels()
-		defer db.Close()
-		db.Find(&b, id).Delete(&b) // Delete does not throw error if ID not found
+		Db.Find(&b, id).Delete(&b) // Delete does not throw error if ID not found
 		w.WriteHeader(http.StatusNoContent)
 		fmt.Fprint(w, `{"Message":"Successfully deleted"}`)
 	default:
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusMethodNotAllowed)
 		fmt.Fprint(w, `{"Message":"Method not allowed"}`)
 	}
 }
