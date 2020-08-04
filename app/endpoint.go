@@ -10,47 +10,6 @@ import (
 	"github.com/Uchencho/toDo-App/models"
 )
 
-type task struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	StartTime   string `json:"start-time"`
-	Alarm       bool   `json:"alarm"`
-}
-
-func createTasks() []task {
-	tasks := []task{
-		task{
-			Name:        "Nils",
-			Description: "Create issues on github to solve",
-			StartTime:   "02-08-2020",
-			Alarm:       true,
-		},
-		task{
-			Name:        "Uche",
-			Description: "Create list view endpoint",
-			StartTime:   "08-08-2020",
-			Alarm:       false,
-		},
-		task{
-			Name:        "Uche",
-			Description: "Complete OkraGo app",
-			StartTime:   "09-08-2020",
-			Alarm:       true,
-		},
-		task{
-			Name:        "Uche",
-			Description: "Start learning Goroutines",
-			StartTime:   "19-08-2020",
-			Alarm:       false,
-		},
-	}
-	return tasks
-}
-
-func getTask(id int) task {
-	return createTasks()[id]
-}
-
 func CreateEntryEndpoint(w http.ResponseWriter, req *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
@@ -112,29 +71,55 @@ func TaskHandler(w http.ResponseWriter, req *http.Request) {
 
 	switch req.Method {
 	case http.MethodGet:
-		jsonResp, err := json.Marshal(getTask(id))
+		var b models.Task
+
+		db := models.SetupModels()
+		defer db.Close()
+		db.Find(&b, id)
+
+		jsonResp, err := json.Marshal(b)
 		if err != nil {
-			fmt.Printf("Error marshalling json %v", err)
+			fmt.Println(err)
 		}
-		w.WriteHeader(200)
+
+		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, string(jsonResp))
 	case http.MethodPut:
-		u := getTask(id)
-		u.Alarm = true
+		var b models.Task
+		var z models.Updatetask
 
-		jsonResp, err := json.Marshal(getTask(id))
+		// Decode what is sent
+		err := json.NewDecoder(req.Body).Decode(&z)
+		if err != nil {
+			fmt.Println(err)
+			panic(err)
+		}
+
+		// Initialize the model
+		db := models.SetupModels()
+		defer db.Close()
+		db.Find(&b, id)
+
+		// Set the correct records
+		b.Alarm = z.Alarm
+		b.Description = z.Description
+		b.Name = z.Name
+		b.StartTime = z.StartTime
+
+		// Save
+		db.Save(&b)
+
+		jsonResp, err := json.Marshal(b)
 		if err != nil {
 			fmt.Printf("Error marshalling json %v", err)
 		}
-		w.WriteHeader(201)
+		w.WriteHeader(http.StatusAccepted)
 		fmt.Fprint(w, string(jsonResp))
 	case http.MethodDelete:
-		// tasks := createTasks()
 		w.WriteHeader(204)
-		// tasks = append(tasks[:id], tasks[id+1:]...)
 		fmt.Fprint(w, "Item with ID "+strconv.Itoa(id)+" has been successully deleted")
 	default:
-		w.WriteHeader(400)
-		fmt.Fprint(w, "Method is not allowed")
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, `{"Message":"Method not allowed"}`)
 	}
 }
