@@ -100,14 +100,11 @@ func TaskHandler(w http.ResponseWriter, req *http.Request) {
 		defer db.Close()
 		db.Find(&b, id)
 
-		// Set the correct records
-		b.Alarm = z.Alarm
-		b.Description = z.Description
-		b.Name = z.Name
-		b.StartTime = z.StartTime
-
-		// Save
-		db.Save(&b)
+		// Update records that are available
+		db.Model(&b).Updates(models.Task{Name: z.Name,
+			Description: z.Description,
+			StartTime:   z.StartTime,
+			Alarm:       z.Alarm})
 
 		jsonResp, err := json.Marshal(b)
 		if err != nil {
@@ -116,8 +113,14 @@ func TaskHandler(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusAccepted)
 		fmt.Fprint(w, string(jsonResp))
 	case http.MethodDelete:
-		w.WriteHeader(204)
-		fmt.Fprint(w, "Item with ID "+strconv.Itoa(id)+" has been successully deleted")
+		var b models.Task
+
+		db := models.SetupModels()
+		defer db.Close()
+		db.Find(&b, id).Delete(&b)
+		// db.Delete(&b)
+		w.WriteHeader(http.StatusNoContent)
+		fmt.Fprint(w, `{"Message":"Successfully deleted"}`)
 	default:
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, `{"Message":"Method not allowed"}`)
