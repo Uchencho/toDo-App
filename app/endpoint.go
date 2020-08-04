@@ -76,17 +76,32 @@ func TaskHandler(w http.ResponseWriter, req *http.Request) {
 		db := models.SetupModels()
 		defer db.Close()
 		db.Find(&b, id)
+		if b.ID == 0 {
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprint(w, `{"Message":"No task with that ID"}`)
+			return
+		}
 
 		jsonResp, err := json.Marshal(b)
 		if err != nil {
 			fmt.Println(err)
 		}
 
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, string(jsonResp))
 	case http.MethodPut:
 		var b models.Task
 		var z models.Updatetask
+
+		// Initialize the model
+		db := models.SetupModels()
+		defer db.Close()
+		db.Find(&b, id)
+		if b.ID == 0 {
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprint(w, `{"Message":"No task with that ID"}`)
+			return
+		}
 
 		// Decode what is sent
 		err := json.NewDecoder(req.Body).Decode(&z)
@@ -94,11 +109,6 @@ func TaskHandler(w http.ResponseWriter, req *http.Request) {
 			fmt.Println(err)
 			panic(err)
 		}
-
-		// Initialize the model
-		db := models.SetupModels()
-		defer db.Close()
-		db.Find(&b, id)
 
 		// Update records that are available
 		db.Model(&b).Updates(models.Task{Name: z.Name,
@@ -117,8 +127,7 @@ func TaskHandler(w http.ResponseWriter, req *http.Request) {
 
 		db := models.SetupModels()
 		defer db.Close()
-		db.Find(&b, id).Delete(&b)
-		// db.Delete(&b)
+		db.Find(&b, id).Delete(&b) // Delete does not throw error if ID not found
 		w.WriteHeader(http.StatusNoContent)
 		fmt.Fprint(w, `{"Message":"Successfully deleted"}`)
 	default:
