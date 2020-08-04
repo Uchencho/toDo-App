@@ -77,19 +77,33 @@ func CreateEntryEndpoint(w http.ResponseWriter, req *http.Request) {
 
 	default:
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "Method not allowed")
+		fmt.Fprint(w, `{"Message":"Method not allowed"}`)
 	}
 }
 
 func ListAPIView(w http.ResponseWriter, req *http.Request) {
-	tasks := createTasks()
-	jsonResp, err := json.Marshal(tasks)
-	if err != nil {
-		fmt.Println(err)
-	}
+
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	fmt.Fprint(w, string(jsonResp))
+	switch req.Method {
+	case http.MethodGet:
+		var b []models.Task
+
+		db := models.SetupModels()
+		defer db.Close()
+		db.Find(&b)
+
+		jsonResp, err := json.Marshal(b)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, string(jsonResp))
+
+	default:
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, `{"Message":"Method not allowed"}`)
+	}
 }
 
 func TaskHandler(w http.ResponseWriter, req *http.Request) {

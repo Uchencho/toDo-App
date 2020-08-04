@@ -17,8 +17,6 @@ func main() {
 		}
 	}()
 
-	// _ = models.SetupModels()
-
 	http.HandleFunc("/healthcheck", app.Healthcheck)
 	http.HandleFunc("/task/create", app.CreateEntryEndpoint)
 	http.HandleFunc("/tasks", app.ListAPIView)

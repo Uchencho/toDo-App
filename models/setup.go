@@ -19,14 +19,12 @@ func SetupModels() *gorm.DB {
 	postgres_conname := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s sslmode=disable",
 		POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PASSWORD, DB_NAME)
 
-	fmt.Println("conname is\t\t", postgres_conname)
-
 	db, err := gorm.Open("postgres", postgres_conname)
 	if err != nil {
 		fmt.Println(err)
 		panic("Failed to connect to database")
 	}
-	// defer db.Close()
+	fmt.Println("Connected")
 
 	db.AutoMigrate(&Task{})
 
