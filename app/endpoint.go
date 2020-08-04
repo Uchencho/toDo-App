@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/Uchencho/toDo-App/models"
 )
 
 type task struct {
@@ -49,26 +51,34 @@ func getTask(id int) task {
 	return createTasks()[id]
 }
 
-func createEntry(alarm bool, name, description, startTime string) task {
-
-	u := task{
-		Name:        name,
-		Description: description,
-		StartTime:   startTime,
-		Alarm:       alarm,
-	}
-	return u
-}
-
 func CreateEntryEndpoint(w http.ResponseWriter, req *http.Request) {
-	z := createEntry(false, "Uche", "First To DO entry", "01-08-2020")
-	jsonResp, err := json.Marshal(z)
-	if err != nil {
-		fmt.Println(err)
-	}
+
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	fmt.Fprint(w, string(jsonResp))
+	switch req.Method {
+	case http.MethodPost:
+		var b models.Task
+
+		err := json.NewDecoder(req.Body).Decode(&b)
+		if err != nil {
+			fmt.Println(err)
+			panic(err)
+		}
+
+		db := models.SetupModels()
+		defer db.Close()
+		db.Create(&b)
+
+		jsonResp, err := json.Marshal(b)
+		if err != nil {
+			fmt.Println(err)
+		}
+		w.WriteHeader(http.StatusCreated)
+		fmt.Fprint(w, string(jsonResp))
+
+	default:
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, "Method not allowed")
+	}
 }
 
 func ListAPIView(w http.ResponseWriter, req *http.Request) {

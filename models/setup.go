@@ -26,7 +26,7 @@ func SetupModels() *gorm.DB {
 		fmt.Println(err)
 		panic("Failed to connect to database")
 	}
-	defer db.Close()
+	// defer db.Close()
 
 	db.AutoMigrate(&Task{})
 
