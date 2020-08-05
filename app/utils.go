@@ -19,6 +19,8 @@ var (
 )
 
 func Healthcheck(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	resp := &healthJSON{
 		Name:   "REST based TODO APP is up and running",
 		Active: true,

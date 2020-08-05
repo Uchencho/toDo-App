@@ -6,80 +6,61 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/Uchencho/toDo-App/models"
 )
 
-type task struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	StartTime   string `json:"start-time"`
-	Alarm       bool   `json:"alarm"`
-}
-
-func createTasks() []task {
-	tasks := []task{
-		task{
-			Name:        "Nils",
-			Description: "Create issues on github to solve",
-			StartTime:   "02-08-2020",
-			Alarm:       true,
-		},
-		task{
-			Name:        "Uche",
-			Description: "Create list view endpoint",
-			StartTime:   "08-08-2020",
-			Alarm:       false,
-		},
-		task{
-			Name:        "Uche",
-			Description: "Complete OkraGo app",
-			StartTime:   "09-08-2020",
-			Alarm:       true,
-		},
-		task{
-			Name:        "Uche",
-			Description: "Start learning Goroutines",
-			StartTime:   "19-08-2020",
-			Alarm:       false,
-		},
-	}
-	return tasks
-}
-
-func getTask(id int) task {
-	return createTasks()[id]
-}
-
-func createEntry(alarm bool, name, description, startTime string) task {
-
-	u := task{
-		Name:        name,
-		Description: description,
-		StartTime:   startTime,
-		Alarm:       alarm,
-	}
-	return u
-}
+var Db = models.ConnectDatabase()
 
 func CreateEntryEndpoint(w http.ResponseWriter, req *http.Request) {
-	z := createEntry(false, "Uche", "First To DO entry", "01-08-2020")
-	jsonResp, err := json.Marshal(z)
-	if err != nil {
-		fmt.Println(err)
-	}
+
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	fmt.Fprint(w, string(jsonResp))
+	switch req.Method {
+	case http.MethodPost:
+		var b models.Task
+
+		err := json.NewDecoder(req.Body).Decode(&b)
+		if err != nil {
+			fmt.Println(err)
+			panic(err)
+		}
+
+		Db.Create(&b)
+
+		jsonResp, err := json.Marshal(b)
+		if err != nil {
+			fmt.Println(err)
+		}
+		w.WriteHeader(http.StatusCreated)
+		fmt.Fprint(w, string(jsonResp))
+
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		fmt.Fprint(w, `{"Message":"Method not allowed"}`)
+	}
 }
 
 func ListAPIView(w http.ResponseWriter, req *http.Request) {
-	tasks := createTasks()
-	jsonResp, err := json.Marshal(tasks)
-	if err != nil {
-		fmt.Println(err)
-	}
+
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	fmt.Fprint(w, string(jsonResp))
+	switch req.Method {
+	case http.MethodGet:
+		var b []models.Task
+
+		Db.Find(&b)
+
+		jsonResp, err := json.Marshal(b)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, string(jsonResp))
+
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		fmt.Fprint(w, `{"Message":"Method not allowed"}`)
+	}
 }
 
 func TaskHandler(w http.ResponseWriter, req *http.Request) {
@@ -88,29 +69,68 @@ func TaskHandler(w http.ResponseWriter, req *http.Request) {
 
 	switch req.Method {
 	case http.MethodGet:
-		jsonResp, err := json.Marshal(getTask(id))
-		if err != nil {
-			fmt.Printf("Error marshalling json %v", err)
+		var b models.Task
+
+		Db.Find(&b, id)
+		if b.ID == 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, `{"Message":"No task with that ID"}`)
+			return
 		}
-		w.WriteHeader(200)
+
+		jsonResp, err := json.Marshal(b)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, string(jsonResp))
 	case http.MethodPut:
-		u := getTask(id)
-		u.Alarm = true
+		var b models.Task
+		var z models.Updatetask
 
-		jsonResp, err := json.Marshal(getTask(id))
+		// Initialize the mode
+
+		Db.Find(&b, id)
+		if b.ID == 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, `{"Message":"No task with that ID"}`)
+			return
+		}
+
+		// Decode what is sent
+		err := json.NewDecoder(req.Body).Decode(&z)
+		if err != nil {
+			fmt.Println(err)
+			panic(err)
+		}
+
+		// Update records that are available
+		Db.Model(&b).Updates(models.Task{Name: z.Name,
+			Description: z.Description,
+			StartTime:   z.StartTime,
+			Alarm:       z.Alarm})
+
+		jsonResp, err := json.Marshal(b)
 		if err != nil {
 			fmt.Printf("Error marshalling json %v", err)
 		}
-		w.WriteHeader(201)
+		w.WriteHeader(http.StatusAccepted)
 		fmt.Fprint(w, string(jsonResp))
 	case http.MethodDelete:
-		// tasks := createTasks()
-		w.WriteHeader(204)
-		// tasks = append(tasks[:id], tasks[id+1:]...)
-		fmt.Fprint(w, "Item with ID "+strconv.Itoa(id)+" has been successully deleted")
+		var b models.Task
+
+		Db.Find(&b, id) // Delete does not throw error if ID not found
+		if b.ID == 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, `{"Message":"No task with that ID"}`)
+			return
+		}
+		Db.Delete(&b)
+		w.WriteHeader(http.StatusNoContent)
+		fmt.Fprint(w, `{"Message":"Successfully deleted"}`)
 	default:
-		w.WriteHeader(400)
-		fmt.Fprint(w, "Method is not allowed")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		fmt.Fprint(w, `{"Message":"Method not allowed"}`)
 	}
 }
