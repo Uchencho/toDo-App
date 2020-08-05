@@ -73,7 +73,7 @@ func TaskHandler(w http.ResponseWriter, req *http.Request) {
 
 		Db.Find(&b, id)
 		if b.ID == 0 {
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprint(w, `{"Message":"No task with that ID"}`)
 			return
 		}
@@ -93,7 +93,7 @@ func TaskHandler(w http.ResponseWriter, req *http.Request) {
 
 		Db.Find(&b, id)
 		if b.ID == 0 {
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprint(w, `{"Message":"No task with that ID"}`)
 			return
 		}
@@ -120,7 +120,13 @@ func TaskHandler(w http.ResponseWriter, req *http.Request) {
 	case http.MethodDelete:
 		var b models.Task
 
-		Db.Find(&b, id).Delete(&b) // Delete does not throw error if ID not found
+		Db.Find(&b, id) // Delete does not throw error if ID not found
+		if b.ID == 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, `{"Message":"No task with that ID"}`)
+			return
+		}
+		Db.Delete(&b)
 		w.WriteHeader(http.StatusNoContent)
 		fmt.Fprint(w, `{"Message":"Successfully deleted"}`)
 	default:
