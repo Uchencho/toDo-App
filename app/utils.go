@@ -24,7 +24,7 @@ var (
 func Healthcheck(w http.ResponseWriter, req *http.Request) {
 
 	var b []models.Task
-	Db.Find(&b)
+	Db.Limit(3).Find(&b)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
