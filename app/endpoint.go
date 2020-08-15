@@ -12,34 +12,6 @@ import (
 
 var Db = models.ConnectDatabase()
 
-func CreateEntryEndpoint(w http.ResponseWriter, req *http.Request) {
-
-	w.Header().Set("Content-Type", "application/json")
-	switch req.Method {
-	case http.MethodPost:
-		var b models.Task
-
-		err := json.NewDecoder(req.Body).Decode(&b)
-		if err != nil {
-			fmt.Println(err)
-			panic(err)
-		}
-
-		Db.Create(&b)
-
-		jsonResp, err := json.Marshal(b)
-		if err != nil {
-			fmt.Println(err)
-		}
-		w.WriteHeader(http.StatusCreated)
-		fmt.Fprint(w, string(jsonResp))
-
-	default:
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		fmt.Fprint(w, `{"Message":"Method not allowed"}`)
-	}
-}
-
 func ListAPIView(w http.ResponseWriter, req *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
@@ -84,6 +56,23 @@ func TaskHandler(w http.ResponseWriter, req *http.Request) {
 		}
 
 		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, string(jsonResp))
+	case http.MethodPost:
+		var b models.Task
+
+		err := json.NewDecoder(req.Body).Decode(&b)
+		if err != nil {
+			fmt.Println(err)
+			panic(err)
+		}
+
+		Db.Create(&b)
+
+		jsonResp, err := json.Marshal(b)
+		if err != nil {
+			fmt.Println(err)
+		}
+		w.WriteHeader(http.StatusCreated)
 		fmt.Fprint(w, string(jsonResp))
 	case http.MethodPut:
 		var b models.Task
