@@ -20,7 +20,6 @@ func main() {
 	defer app.Db.Close()
 
 	http.HandleFunc("/healthcheck", app.Healthcheck)
-	http.HandleFunc("/task/create", app.CreateEntryEndpoint)
 	http.HandleFunc("/tasks", app.ListAPIView)
 	http.HandleFunc("/tasks/", app.TaskHandler)
 	app.InfoLogger.Println(app.GetServerAddress())
